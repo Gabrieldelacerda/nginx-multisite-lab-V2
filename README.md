@@ -1,4 +1,32 @@
-Nginx Multi-Site Lab (Local Dev Environment)
+Nginx Multi-Site Lab (Local Dev Environment) V2:
+
+
+===============
+What changed in V2?
+
+The first version of this lab was implemented directly on the host system using a standard Nginx installation.
+
+In V2, the project was expanded to introduce basic automation and containerization concepts commonly used in modern infrastructure.
+
+The main changes were:
+
+Docker
+
+* Nginx now runs inside a Docker container instead of being installed directly on the system.
+* The container is built and started using "docker-compose".
+* Site configuration and content are mounted into the container as volumes.
+
+This simulates how web services are commonly deployed in containerized environments.
+
+Ansible
+
+* Ansible is used to automate the environment setup.
+* The playbook installs required packages and prepares the configuration needed to run the project.
+* This removes the need for manual configuration steps and makes the environment reproducible.
+
+Together, Docker and Ansible allow the entire lab environment to be recreated quickly and consistently.
+===============
+
 
 This repository documents a small hands-on lab where I configured Nginx to serve multiple websites on the same machine using different hostnames.
 
