@@ -3,3 +3,16 @@
 .env
 .DS_Store
 Thumbs.db
+
+#Git ignore part for Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+#Terraform variable files
+terraform.tfvars
+*.tfvars
+
+#Private keys
+*.pem
