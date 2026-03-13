@@ -11,7 +11,7 @@ resource "aws_security_group" "nginx_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
 
   ingress {
@@ -36,6 +36,13 @@ resource "aws_security_group" "nginx_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name        = "nginx-multisite-sg"
+    Project     = "devops-lab"
+    Environment = "lab"
+    ManagedBy   = "terraform"
+  }
 }
 
 resource "aws_instance" "nginx_server" {
@@ -46,7 +53,9 @@ resource "aws_instance" "nginx_server" {
   associate_public_ip_address = true
 
   tags = {
-    Name    = "nginx-multisite-server"
-    Project = "devops-lab"
+    Name        = "nginx-multisite-server"
+    Project     = "devops-lab"
+    Environment = "lab"
+    ManagedBy   = "terraform"
   }
 }
