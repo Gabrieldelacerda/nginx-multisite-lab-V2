@@ -2,6 +2,7 @@ provider "aws" {
   region = "sa-east-1"
 }
 
+# Get latest Amazon Linux 2 AMI
 data "aws_ami" "amazon_linux" {
   most_recent = true
 
@@ -13,16 +14,17 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+# Security Group
 resource "aws_security_group" "nginx_sg" {
   name        = "nginx-multisite-sg"
   description = "Allow SSH, HTTP, HTTPS"
 
   ingress {
-    description = "SSH"
+    description = "SSH (your IP)"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
+    cidr_blocks = ["200.169.13.2/32"]
   }
 
   ingress {
@@ -56,12 +58,25 @@ resource "aws_security_group" "nginx_sg" {
   }
 }
 
+# EC2 Instance
 resource "aws_instance" "nginx_server" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t3.micro"
-  key_name                    = var.key_name
+  key_name                    = "nginx-key"
   vpc_security_group_ids      = [aws_security_group.nginx_sg.id]
   associate_public_ip_address = true
+
+  user_data = <<-EOT
+    #!/bin/bash
+    yum update -y
+
+    amazon-linux-extras install docker -y
+    systemctl start docker
+    systemctl enable docker
+    usermod -aG docker ec2-user
+
+    docker run -d -p 80:80 --name nginx nginx
+  EOT
 
   tags = {
     Name        = "nginx-multisite-server"
