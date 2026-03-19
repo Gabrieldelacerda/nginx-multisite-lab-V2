@@ -5,5 +5,5 @@ output "instance_public_ip" {
 
 output "ssh_command" {
   description = "SSH command to connect"
-  value       = "ssh -i ~/.ssh/${var.key_name}.pem ubuntu@${aws_instance.nginx_server.public_ip}"
+  value       = "ssh -i nginx-key.pem ec2-user@${aws_instance.nginx_server.public_ip}"
 }

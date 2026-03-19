@@ -2,7 +2,6 @@ provider "aws" {
   region = "sa-east-1"
 }
 
-# Get latest Amazon Linux 2 AMI
 data "aws_ami" "amazon_linux" {
   most_recent = true
 
@@ -14,18 +13,9 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-# Security Group
 resource "aws_security_group" "nginx_sg" {
   name        = "nginx-multisite-sg"
   description = "Allow SSH, HTTP, HTTPS"
-
-  ingress {
-    description = "SSH (your IP)"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["200.169.13.2/32"]
-  }
 
   ingress {
     description = "HTTP"
@@ -43,22 +33,22 @@ resource "aws_security_group" "nginx_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "SSH (your IP)"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["200.169.13.2/32"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Name        = "nginx-multisite-sg"
-    Project     = "devops-lab"
-    Environment = "lab"
-    ManagedBy   = "terraform"
-  }
 }
 
-# EC2 Instance
 resource "aws_instance" "nginx_server" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t3.micro"
@@ -66,17 +56,16 @@ resource "aws_instance" "nginx_server" {
   vpc_security_group_ids      = [aws_security_group.nginx_sg.id]
   associate_public_ip_address = true
 
-  user_data = <<-EOT
-    #!/bin/bash
-    yum update -y
+  user_data = <<-EOF
+              #!/bin/bash
+              yum update -y
+              amazon-linux-extras install docker -y
+              systemctl start docker
+              systemctl enable docker
+              usermod -aG docker ec2-user
 
-    amazon-linux-extras install docker -y
-    systemctl start docker
-    systemctl enable docker
-    usermod -aG docker ec2-user
-
-    docker run -d -p 80:80 --name nginx nginx
-  EOT
+              docker run -d -p 80:80 --name nginx nginx
+              EOF
 
   tags = {
     Name        = "nginx-multisite-server"
