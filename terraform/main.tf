@@ -24,7 +24,7 @@ resource "aws_security_group" "nginx_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["200.169.13.2/32"] # your IP
+    cidr_blocks = ["200.169.13.2/32"]
   }
 
   ingress {
@@ -76,20 +76,45 @@ resource "aws_instance" "nginx_server" {
 
               usermod -aG docker ec2-user
 
-              # wait for docker to be ready
               sleep 10
 
-              # create custom site
+              # site1
               mkdir -p /home/ec2-user/site1
-
               cat <<EOT > /home/ec2-user/site1/index.html
               <h1>Site 1</h1>
-              <p>This is my custom nginx site running on EC2</p>
+              <p>This is site 1</p>
               EOT
 
-              # run nginx with mounted content
+              # site2
+              mkdir -p /home/ec2-user/site2
+              cat <<EOT > /home/ec2-user/site2/index.html
+              <h1>Site 2</h1>
+              <p>This is site 2</p>
+              EOT
+
+              # custom nginx config
+              mkdir -p /home/ec2-user/nginx
+              cat <<EOT > /home/ec2-user/nginx/default.conf
+              server {
+                  listen 80;
+
+                  location / {
+                      root /usr/share/nginx/html/site1;
+                      index index.html;
+                  }
+
+                  location /site2 {
+                      root /usr/share/nginx/html;
+                      index index.html;
+                  }
+              }
+              EOT
+
+              # run nginx with both sites
               docker run -d -p 80:80 \
-                -v /home/ec2-user/site1:/usr/share/nginx/html \
+                -v /home/ec2-user/site1:/usr/share/nginx/html/site1 \
+                -v /home/ec2-user/site2:/usr/share/nginx/html/site2 \
+                -v /home/ec2-user/nginx/default.conf:/etc/nginx/conf.d/default.conf \
                 --name nginx nginx
               EOF
 
