@@ -79,7 +79,18 @@ resource "aws_instance" "nginx_server" {
               # wait for docker to be ready
               sleep 10
 
-              docker run -d -p 80:80 --name nginx nginx
+              # create custom site
+              mkdir -p /home/ec2-user/site1
+
+              cat <<EOT > /home/ec2-user/site1/index.html
+              <h1>Site 1</h1>
+              <p>This is my custom nginx site running on EC2</p>
+              EOT
+
+              # run nginx with mounted content
+              docker run -d -p 80:80 \
+                -v /home/ec2-user/site1:/usr/share/nginx/html \
+                --name nginx nginx
               EOF
 
   tags = {
