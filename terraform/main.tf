@@ -2,7 +2,7 @@ provider "aws" {
   region = "sa-east-1"
 }
 
-# Get latest Amazon Linux 2 AMI
+#getting the  latest Amazon Linux 2 AMI
 data "aws_ami" "amazon_linux" {
   most_recent = true
 
@@ -14,7 +14,7 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-# Security Group
+#Security Group
 resource "aws_security_group" "nginx_sg" {
   name        = "nginx-multisite-sg"
   description = "Allow SSH, HTTP, HTTPS"
@@ -58,7 +58,7 @@ resource "aws_security_group" "nginx_sg" {
   }
 }
 
-# EC2 Instance
+#EC2 Instance
 resource "aws_instance" "nginx_server" {
   ami                         = data.aws_ami.amazon_linux.id
   instance_type               = "t3.micro"
@@ -69,7 +69,7 @@ resource "aws_instance" "nginx_server" {
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
-              amazon-linux-extras install docker -y
+              yum install -y docker
 
               systemctl start docker
               systemctl enable docker
@@ -78,43 +78,23 @@ resource "aws_instance" "nginx_server" {
 
               sleep 10
 
-              # site1
+              #process of  creating site1
               mkdir -p /home/ec2-user/site1
               cat <<EOT > /home/ec2-user/site1/index.html
               <h1>Site 1</h1>
-              <p>This is site 1</p>
+              <p>This is my custom nginx site running on EC2</p>
               EOT
 
-              # site2
-              mkdir -p /home/ec2-user/site2
-              cat <<EOT > /home/ec2-user/site2/index.html
+              #process of creating site2
+              mkdir -p /home/ec2-user/site1/site2
+              cat <<EOT > /home/ec2-user/site1/site2/index.html
               <h1>Site 2</h1>
-              <p>This is site 2</p>
+              <p>This is my second nginx site running on EC2</p>
               EOT
 
-              # custom nginx config
-              mkdir -p /home/ec2-user/nginx
-              cat <<EOT > /home/ec2-user/nginx/default.conf
-              server {
-                  listen 80;
-
-                  location / {
-                      root /usr/share/nginx/html/site1;
-                      index index.html;
-                  }
-
-                  location /site2 {
-                      root /usr/share/nginx/html;
-                      index index.html;
-                  }
-              }
-              EOT
-
-              # run nginx with both sites
+              #running nginx
               docker run -d -p 80:80 \
-                -v /home/ec2-user/site1:/usr/share/nginx/html/site1 \
-                -v /home/ec2-user/site2:/usr/share/nginx/html/site2 \
-                -v /home/ec2-user/nginx/default.conf:/etc/nginx/conf.d/default.conf \
+                -v /home/ec2-user/site1:/usr/share/nginx/html \
                 --name nginx nginx
               EOF
 
@@ -124,4 +104,19 @@ resource "aws_instance" "nginx_server" {
     Environment = "lab"
     ManagedBy   = "terraform"
   }
+}
+
+#Elastic IP
+resource "aws_eip" "nginx_eip" {
+  domain = "vpc"
+
+  tags = {
+    Name = "nginx-eip"
+  }
+}
+
+#Associate Elastic IP to EC2
+resource "aws_eip_association" "nginx_eip_assoc" {
+  instance_id   = aws_instance.nginx_server.id
+  allocation_id = aws_eip.nginx_eip.id
 }
