@@ -64,7 +64,7 @@ resource "aws_instance" "nginx_server" {
 
    
     mkdir -p /home/ec2-user/site1
-    echo "<h1>Gabriel's Project</h1><p>nginx running on AWS with Terraform + Docker</p>" > /home/ec2-user/site1/index.html
+    echo "<h1>Gabriel de la Cerda Project</h1><p>nginx running on AWS with Terraform + Docker</p>" > /home/ec2-user/site1/index.html
 
    
     mkdir -p /home/ec2-user/site2
