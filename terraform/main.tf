@@ -13,7 +13,6 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-
 resource "aws_security_group" "nginx_sg" {
   name = "nginx-multisite-sg-v2"
 
@@ -41,7 +40,6 @@ resource "aws_security_group" "nginx_sg" {
   }
 }
 
-
 resource "aws_instance" "nginx_server" {
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
@@ -50,52 +48,9 @@ resource "aws_instance" "nginx_server" {
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 
   user_data = <<-EOF
-    #!/bin/bash
-
-    yum update -y
-    amazon-linux-extras install docker -y
-
-    systemctl start docker
-    systemctl enable docker
-
-    usermod -aG docker ec2-user
-
-    sleep 10
-
-   
-    mkdir -p /home/ec2-user/site1
-    echo "<h1>Gabriel de la Cerda Project</h1><p>nginx running on AWS with Terraform + Docker</p>" > /home/ec2-user/site1/index.html
-
-   
-    mkdir -p /home/ec2-user/site2
-    echo "<h1>Second Site</h1><p>This is another nginx route</p>" > /home/ec2-user/site2/index.html
-
-    
-    mkdir -p /home/ec2-user/nginx
-
-    cat <<EOT > /home/ec2-user/nginx/default.conf
-    server {
-        listen 80;
-
-        location / {
-            root /usr/share/nginx/html/site1;
-            index index.html;
-        }
-
-        location /site2 {
-            alias /usr/share/nginx/html/site2;
-            index index.html;
-        }
-    }
-    EOT
-
-    docker run -d -p 80:80 \
-      -v /home/ec2-user/site1:/usr/share/nginx/html/site1 \
-      -v /home/ec2-user/site2:/usr/share/nginx/html/site2 \
-      -v /home/ec2-user/nginx/default.conf:/etc/nginx/conf.d/default.conf \
-      --name nginx nginx
-
-  EOF
+#!/bin/bash
+yum update -y
+EOF
 
   tags = {
     Name = "nginx-multisite-server"
