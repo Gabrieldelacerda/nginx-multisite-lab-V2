@@ -1,58 +1,73 @@
 ---
-- name: Deploy Nginx Multisite Stack
-  hosts: localhost
-  become: yes
+- name: Deploy Nginx Multisite Stack to EC2
+  hosts: web
+  become: true
+
+  vars:
+    project_path: /home/ec2-user/nginx-multisite-lab
 
   tasks:
 
-    - name: Install dependencies
-      apt:
-        name:
-          - ca-certificates
-          - curl
-          - gnupg
+    - name: Install Docker
+      yum:
+        name: docker
         state: present
-        update_cache: yes
 
-    - name: Create keyrings directory
-      file:
-        path: /etc/apt/keyrings
-        state: directory
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
         mode: '0755'
 
-    - name: Add Docker GPG key
-      shell: |
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-        gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-      args:
-        creates: /etc/apt/keyrings/docker.gpg
-
-    - name: Add Docker repository
-      shell: |
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" > /etc/apt/sources.list.d/docker.list
-      args:
-        creates: /etc/apt/sources.list.d/docker.list
-
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-
-    - name: Install Docker Engine
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - docker-buildx-plugin
-          - docker-compose-plugin
-        state: present
-
-    - name: Ensure Docker is running
+    - name: Start and enable Docker
       service:
         name: docker
         state: started
-        enabled: yes
+        enabled: true
 
-    - name: Deploy stack with Docker Compose
-      command: docker compose up -d
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Create project directory
+      file:
+        path: "{{ project_path }}"
+        state: directory
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
+
+    - name: Copy docker-compose file
+      copy:
+        src: ../docker-compose.yml
+        dest: "{{ project_path }}/docker-compose.yml"
+
+    - name: Copy nginx config
+      copy:
+        src: ../nginx/
+        dest: "{{ project_path }}/nginx/"
+
+    - name: Sync sites (force update)
+      synchronize:
+        src: ../sites/
+        dest: "{{ project_path }}/sites/"
+        recursive: yes
+        delete: yes
+
+    - name: Copy certs
+      copy:
+        src: ../certs/
+        dest: "{{ project_path }}/certs/"
+
+    - name: Stop containers
+      command: /usr/local/bin/docker-compose down
       args:
-        chdir: /home/gabriel/nginx-multisite-lab
+        chdir: "{{ project_path }}"
+      ignore_errors: yes
+
+    - name: Start containers fresh
+      command: /usr/local/bin/docker-compose up -d
+      args:
+        chdir: "{{ project_path }}"
