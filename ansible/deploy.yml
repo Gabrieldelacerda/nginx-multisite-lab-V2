@@ -41,24 +41,27 @@
 
     - name: Copy docker-compose file
       copy:
-        src: ../docker-compose.yml
+        src: "{{ playbook_dir }}/../docker-compose.yml"
         dest: "{{ project_path }}/docker-compose.yml"
 
     - name: Copy nginx config
       copy:
-        src: ../nginx/
+        src: "{{ playbook_dir }}/../nginx/"
         dest: "{{ project_path }}/nginx/"
 
-    - name: Sync sites (force update)
-      synchronize:
-        src: ../sites/
+    - name: Remove old sites
+      file:
+        path: "{{ project_path }}/sites/"
+        state: absent
+
+    - name: Copy sites fresh
+      copy:
+        src: "{{ playbook_dir }}/../sites/"
         dest: "{{ project_path }}/sites/"
-        recursive: yes
-        delete: yes
 
     - name: Copy certs
       copy:
-        src: ../certs/
+        src: "{{ playbook_dir }}/../certs/"
         dest: "{{ project_path }}/certs/"
 
     - name: Stop containers
