@@ -1,0 +1,45 @@
+---
+- name: Deploy application (Docker Compose)
+  hosts: web
+  become: true
+
+  vars:
+    project_path: /home/ec2-user/nginx-multisite-lab
+
+  tasks:
+
+    - name: Copy docker-compose file
+      copy:
+        src: "{{ playbook_dir }}/../docker-compose.yml"
+        dest: "{{ project_path }}/docker-compose.yml"
+
+    - name: Copy nginx config
+      copy:
+        src: "{{ playbook_dir }}/../nginx/"
+        dest: "{{ project_path }}/nginx/"
+
+    - name: Remove old sites
+      file:
+        path: "{{ project_path }}/sites/"
+        state: absent
+
+    - name: Copy sites fresh
+      copy:
+        src: "{{ playbook_dir }}/../sites/"
+        dest: "{{ project_path }}/sites/"
+
+    - name: Copy certs
+      copy:
+        src: "{{ playbook_dir }}/../certs/"
+        dest: "{{ project_path }}/certs/"
+
+    - name: Stop containers
+      command: /usr/local/bin/docker-compose down
+      args:
+        chdir: "{{ project_path }}"
+      ignore_errors: yes
+
+    - name: Start containers
+      command: /usr/local/bin/docker-compose up -d
+      args:
+        chdir: "{{ project_path }}"
