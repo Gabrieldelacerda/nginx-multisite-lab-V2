@@ -1,0 +1,40 @@
+---
+- name: Setup EC2 instance (Docker environment)
+  hosts: web
+  become: true
+
+  vars:
+    project_path: /home/ec2-user/nginx-multisite-lab
+
+  tasks:
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Create project directory
+      file:
+        path: "{{ project_path }}"
+        state: directory
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
