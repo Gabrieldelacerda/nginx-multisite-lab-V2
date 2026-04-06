@@ -1,95 +1,19 @@
-Nginx Multi-Site Lab (Local Dev Environment) V2:
+Nginx Multi-Site Lab. By Gabriel de la Cerda
 
+This project started as a simple idea: understand how Nginx serves multiple websites from the same machine. I set it up first in a local Ubuntu VM, configuring two sites — site1.local and site2.local — each with its own directory and server block. The routing is based on the Host header, which is how real servers differentiate domains sharing the same IP.
 
-===============
-What changed in V2?
+At that stage, everything was manual. I edited Nginx configs directly, reloaded the service, and tested with curl and the browser. I also enabled HTTPS using self-signed certificates just to get familiar with the process and the kinds of errors that usually come with it.
 
-The first version of this lab was implemented directly on the host system using a standard Nginx installation.
+After getting it working, the next step was making the setup less manual and more reproducible. I moved Nginx into a Docker container so the environment could be recreated consistently. Instead of relying on system-level configuration, the server setup and site files are mounted into the container, which made it easier to control and reset everything when needed.
 
-In V2, the project was expanded to introduce basic automation and containerization concepts commonly used in modern infrastructure.
+Then I introduced Ansible to automate the environment setup. Instead of repeating installation steps, I wrote a playbook that prepares the machine and gets everything ready to run the project. This removed a lot of friction and made the setup predictable.
 
-The main changes were:
+Once that was stable locally, I took the same idea to AWS. Using Terraform, I provisioned an EC2 instance and defined the infrastructure as code. From there, Ansible connects remotely to configure the instance, and Docker runs the same Nginx container as before. One of the main takeaways here was that once the containerized setup worked locally, moving it to the cloud required very few changes.
 
-Docker
+Testing in the cloud is done by sending requests directly to the EC2 public IP while specifying the Host header, which simulates real domain routing. For example, using curl with different hostnames returns the correct site content.
 
-* Nginx now runs inside a Docker container instead of being installed directly on the system.
-* The container is built and started using "docker-compose".
-* Site configuration and content are mounted into the container as volumes.
+During this process, I ran into an issue where both domains were returning the same page. This turned out to be caused by a misconfiguration in Nginx, where one of the server blocks was set as a catch-all using "server_name _;". After correcting it to the proper hostname and recreating the container, the routing behaved as expected. I verified the fix by checking the configuration inside the container and retesting the requests.
 
-This simulates how web services are commonly deployed in containerized environments.
+Overall, this project reflects how I approach learning and problem-solving: start simple, make it work, then improve it step by step. It also shows practical experience with Nginx configuration, containerization, infrastructure provisioning, and debugging issues across both local and remote environments.
 
-Ansible
-
-* Ansible is used to automate the environment setup.
-* The playbook installs required packages and prepares the configuration needed to run the project.
-* This removes the need for manual configuration steps and makes the environment reproducible.
-
-Together, Docker and Ansible allow the entire lab environment to be recreated quickly and consistently.
-===============
-
-
-This repository documents a small hands-on lab where I configured Nginx to serve multiple websites on the same machine using different hostnames.
-
-The main goal was to practice how virtual hosting works in a real Linux environment, including HTTPS setup and basic debugging.
-
-I ran everything on an Ubuntu virtual machine.
-
-    What I built?
-
-I configured Nginx to serve two local sites on the same server:
-
-"site1.local"
-"site2.local"
-
-Each site has:
-
-* Its own root directory under "/var/www"
-* Its own Nginx server block
-* Independent HTML content
-
-Requests are routed using the "Host" header, simulating how multiple domains are handled on a single server in real environments.
-
-I also enabled HTTPS locally using self-signed certificates for testing purposes.
-
-    How I tested?
-
-From the terminal, I verified that Nginx routes requests correctly based on the hostname:
-
-curl -H "Host: site1.local" http://127.0.0.1
-curl -H "Host: site2.local" http://127.0.0.1
-
-In the browser, I accessed:
-
-"https://site1.local"
-"https://site2.local"
-
-This required adding the hostnames to "/etc/hosts" and accepting the self-signed certificate warning.
-
-    What I learned in practice?
-
-While setting this up, I ran into and fixed real issues that are common in day-to-day work:
-
-* Wrong site being served due to Nginx server block precedence
-* File permission problems under "/var/www"
-* Character encoding issues in HTML files
-* Browser cache causing outdated content to appear
-* Certificate and HTTPS configuration mistakes
-
-This forced me to debug using:
-
-* "nginx -t"
-* "systemctl reload nginx"
-* "curl"
-* Browser dev tools and cache refresh
-
-    Why this project exists?
-
-This lab is not meant to be a production-ready setup.
-
-The purpose is to demonstrate that I can:
-
-* Configure Nginx beyond a default install
-* Understand how virtual hosts work
-* Set up HTTPS in a controlled environment
-* Debug real configuration and OS-level issues
-* Work comfortably in Linux
+There’s still more I can build on top of this, like setting up HTTPS properly in AWS with Certbot, using a real domain with Route53, or adding a CI/CD pipeline, but this version already captures the core concepts I wanted to practice.
