@@ -1,6 +1,15 @@
 Nginx Multi-Site Lab. By Gabriel de la Cerda
 
-You can try the project by yourself, just type this in your browser! http://54.233.211.29
+You can try the project by yourself, just type this in your browser:
+http://54.233.211.29
+
+Before getting into the details, here’s a quick overview of how everything is structured.
+
+The request starts from the browser and reaches an EC2 instance in AWS using its public IP. Inside that instance, Nginx is running in a Docker container. Nginx is configured with virtual hosts, so depending on the Host header, it serves either site1 or site2. Each site has its own directory with static files.
+
+In practice, the layers are separated like this: Terraform is responsible for creating the infrastructure in AWS, Ansible prepares and configures the server, Docker runs the containerized environment, and Nginx handles the routing between the sites.
+
+If you wanted to recreate this environment from scratch, the flow is straightforward. First, the infrastructure is provisioned with Terraform. Then Ansible connects to the instance and installs Docker and deploys the application. After that, the application is already accessible through the public IP.
 
 This project started as a simple idea: understand how Nginx serves multiple websites from the same machine. I set it up first in a local Ubuntu VM, configuring two sites — site1.local and site2.local — each with its own directory and server block. The routing is based on the Host header, which is how real servers differentiate domains sharing the same IP.
 
@@ -15,6 +24,8 @@ Once that was stable locally, I took the same idea to AWS. Using Terraform, I pr
 Testing in the cloud is done by sending requests directly to the EC2 public IP while specifying the Host header, which simulates real domain routing. For example, using curl with different hostnames returns the correct site content.
 
 During this process, I ran into an issue where both domains were returning the same page. This turned out to be caused by a misconfiguration in Nginx, where one of the server blocks was set as a catch-all using "server_name _;". After correcting it to the proper hostname and recreating the container, the routing behaved as expected. I verified the fix by checking the configuration inside the container and retesting the requests.
+
+Some decisions in this project were intentional. I kept the structure simple instead of over-engineering it, focused on separating responsibilities between infrastructure, configuration, and application layers, and used Docker to ensure consistency between local and cloud environments. I also chose to simulate multiple domains using the Host header instead of setting up a real DNS, to keep the focus on how Nginx routing works internally.
 
 Overall, this project reflects how I approach learning and problem-solving: start simple, make it work, then improve it step by step. It also shows practical experience with Nginx configuration, containerization, infrastructure provisioning, and debugging issues across both local and remote environments.
 
