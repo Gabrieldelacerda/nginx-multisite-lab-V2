@@ -1,4 +1,4 @@
-Nginx Multi-Site Lab. By Gabriel de la Cerda
+Nginx Multi-Site Lab. By Gabriel de la Cerda  (versão em português abaixo)
 
 You can try the project by yourself, just type this in your browser:
 http://54.233.211.29
