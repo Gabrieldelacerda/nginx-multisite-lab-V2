@@ -1,5 +1,7 @@
 Nginx Multi-Site Lab. By Gabriel de la Cerda
 
+You can try the project by yourself, just type this in your browser! http://54.233.211.29
+
 This project started as a simple idea: understand how Nginx serves multiple websites from the same machine. I set it up first in a local Ubuntu VM, configuring two sites — site1.local and site2.local — each with its own directory and server block. The routing is based on the Host header, which is how real servers differentiate domains sharing the same IP.
 
 At that stage, everything was manual. I edited Nginx configs directly, reloaded the service, and tested with curl and the browser. I also enabled HTTPS using self-signed certificates just to get familiar with the process and the kinds of errors that usually come with it.
