@@ -64,6 +64,3 @@ Algumas decisões nesse projeto foram intencionais. Mantive a estrutura simples 
 No geral, este projeto reflete como eu abordo aprendizado e resolução de problemas: começo simples, faço funcionar e depois vou melhorando passo a passo. Ele também demonstra experiência prática com configuração de Nginx, containerização, provisionamento de infraestrutura e debugging tanto em ambientes locais quanto remotos.
 
 Ainda há mais coisas que posso evoluir, como configurar HTTPS corretamente na AWS com Certbot, usar um domínio real com Route53 ou adicionar um pipeline de CI/CD, mas essa versão já cobre bem os conceitos principais que eu queria praticar.
-
-
-There’s still more I can build on top of this, like setting up HTTPS properly in AWS with Certbot, using a real domain with Route53, or adding a CI/CD pipeline, but this version already captures the core concepts I wanted to practice.
