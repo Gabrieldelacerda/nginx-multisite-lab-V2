@@ -1,9 +1,23 @@
 Nginx Multi-Site Lab. By Gabriel de la Cerda  (versão em português abaixo)
 
-You can try the project by yourself, just type this in your browser:
+You can type this in your browser to access!
 http://54.233.211.29
 
-Before getting into the details, here’s a quick overview of how everything is structured.
+Quick Start:
+
+Provision infrastructure:
+terraform init
+terraform apply
+
+Configure server:
+ansible-playbook -i inventory.ini deploy.yml
+
+Test virtual hosts:
+curl -H "Host: site1.local" http://54.233.211.29
+curl -H "Host: site2.local" http://54.233.211.29
+
+
+Before getting into the details, here’s a quick overview of how everything is structured:
 
 The request starts from the browser and reaches an EC2 instance in AWS using its public IP. Inside that instance, Nginx is running in a Docker container. Nginx is configured with virtual hosts, so depending on the Host header, it serves either site1 or site2. Each site has its own directory with static files.
 
