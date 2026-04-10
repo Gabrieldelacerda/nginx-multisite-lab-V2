@@ -4,36 +4,27 @@
   <title>Gabriel de la Cerda Project</title>
 </head>
 <body>
-  <h1 style="font-size: 32px;"><b>Gabriel de la Cerda Project</b></h1>
-
-  <p><b>Built by Gabriel de la Cerda</b></p>
-
-  <p><b>Multi-site Nginx deployment on AWS</b></p>
+  <h1>Gabriel de la Cerda Project</h1>
 
   <p>
-    This project demonstrates a complete DevOps workflow:
+    This project, built by Gabriel de la Cerda, demonstrates a complete DevOps workflow running on AWS.
+    The infrastructure is provisioned using Terraform, the server is configured with Ansible,
+    and the application is deployed using Docker Compose.
   </p>
-
-  <ul>
-    <li>Infrastructure provisioned with Terraform</li>
-    <li>Server configuration automated with Ansible</li>
-    <li>Application deployed using Docker Compose</li>
-  </ul>
 
   <p>
-    Multiple sites are served using Nginx virtual hosts.
+    The environment uses Nginx as a reverse proxy to serve multiple sites through virtual host configuration,
+    allowing different domains to route to distinct content from the same server.
   </p>
 
-<p>
-  Access:
-  <br><b>http://54.233.211.29</b> (main site)
-</p>
+  <p>
+    You can access the main site at
+    <a href="http://54.233.211.29">http://54.233.211.29</a>.
+  </p>
 
-<p>
-  Additional virtual hosts (require hosts file configuration):
-  <br><b>site1.local</b>
-  <br><b>site2.local</b>
-</p>
-
+  <p>
+    Additional virtual hosts are also available (after local hosts file configuration),
+    including <code>site1.local</code> and <code>site2.local</code>.
+  </p>
 </body>
 </html>
