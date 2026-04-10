@@ -47,10 +47,7 @@ resource "aws_instance" "nginx_server" {
 
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
 
-  user_data = <<-EOF
-#!/bin/bash
-yum update -y
-EOF
+  user_data = ""
 
   tags = {
     Name = "nginx-multisite-server"
