@@ -13,4 +13,4 @@ To confirm that authentication was successful, the following command was execute
 
 The command returned the AWS account ID and the IAM user information, confirming that the local environment can successfully authenticate with AWS.
 
-With authentication working correctly, the next step in the project will be introducing Terraform. Terraform will be used to provision cloud infrastructure automatically, starting with the creation of a virtual machine instance that will eventually host the Nginx multisite setup.
+Terraform is now used to provision the EC2 instance that hosts the Nginx multisite environment.
