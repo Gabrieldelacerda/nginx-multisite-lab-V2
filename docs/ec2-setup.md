@@ -11,4 +11,4 @@ After installation, the Docker daemon was started and enabled to persist across 
 Docker availability and permissions were validated by running "docker ps", confirming that the daemon was active and accessible without "sudo".
 
 ==Context==
-This step was executed manually as part of the initial environment setup. Future iterations should incorporate this configuration into instance provisioning (via Terraform `user_data`) to ensure consistency and eliminate manual intervention.
+This step is now automated using Ansible, ensuring consistent and repeatable server configuration without manual intervention.
